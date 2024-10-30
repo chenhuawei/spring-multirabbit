@@ -4,8 +4,10 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.impl.CredentialsProvider;
 import com.rabbitmq.client.impl.CredentialsRefreshService;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,6 +203,10 @@ public class MultiRabbitAutoConfiguration {
                         = springFactoryCreator.rabbitConnectionFactory(rabbitConnectionFactoryBeanConfigurer,
                         rabbitCachingConnectionFactoryConfigurer,
                         connectionFactoryCustomizer);
+                Duration connectionTimeout = entry.getValue().getConnectionTimeout();
+                if (Objects.nonNull(connectionTimeout)) {
+                    connectionFactory.getRabbitConnectionFactory().setHandshakeTimeout((int)connectionTimeout.toMillis());
+                }
                 final SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
                 SimpleRabbitListenerContainerFactoryConfigurer configurer =
                         new SimpleRabbitListenerContainerFactoryConfigurer(entry.getValue());
